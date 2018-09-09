@@ -1,0 +1,19 @@
+#!/bin/bash
+
+ref="$(curl -sk https://$1/.well-known/acme-challenge/ref1ectme)"
+
+echo "$ref" | grep -q ^ref1ectme
+if [ $? -eq 0 ]; then
+	refh="$(curl -sk https://$1/.well-known/acme-challenge/'<html>ref')"
+	echo "$refh" | grep -q '^<html>ref'
+	if [ $? -eq 0 ]; then
+		curl -skI "https://$1/.well-known/acme-challenge/<html>ref"|grep -i ^content-type:|grep -q text/html
+		if [ $? -eq 0 ]; then
+			echo "$1 reflects HTML/contentsniffing"
+		else
+			echo "$1 reflects HTML/nosniffing"
+		fi
+	else
+		echo "$1 reflects text"
+	fi
+fi
